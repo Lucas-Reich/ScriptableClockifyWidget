@@ -9,53 +9,27 @@ class ClockifyAPI {
     }
 
     async getWorkspaceId() {
-        const request = new Request(`${CLOCKIFY_BASE_URL}/workspaces`)
-        request.headers = {
-            'Content-Type': 'application/json',
-            'X-Api-key': this.apiKey
-        }
+        const request = this.buildRequest('workspaces')
 
-        const workspace = await request.loadJSON()
-        if (request.response.statusCode === 401) {
-            console.log(request.response)
-            throw "InvalidAPIKeyException"
-        }
-        if (request.response.statusCode !== 200) {
-            console.log(request.response)
-            throw "InvalidClockifyResponse"
-        }
-        return workspace[0].id
+        return (await this.fetchData(request))[0].id
     }
 
     async getUserId() {
-        const request = new Request(`${CLOCKIFY_BASE_URL}/user`)
-        request.headers = {
-            'Content-Type': 'application/json',
-            'X-Api-key': this.apiKey
-        }
+        const request = this.buildRequest('user')
 
-        const user = await request.loadJSON()
-        if (request.response.statusCode === 401) {
-            console.log(request.response)
-            throw "InvalidAPIKeyException"
-        }
-        if (request.response.statusCode !== 200) {
-            console.log(request.response)
-            throw "InvalidClockifyResponse"
-        }
-        return user.id
+        return (await this.fetchData(request)).id
     }
 
-    async getTimeEntriesForYear(userId, workspaceId, year) {
-        const start = `${year}-01-01T00:00:01Z`
-        const end = `${year}-12-31T23:59:59Z`
+    async getTimeEntriesForDateRange(userId, workspaceId, dateRangeStart, dateRangeEnd) {
+        const start = `${dateRangeStart}T00:00:01Z`
+        const end = `${dateRangeEnd}T23:59:59Z`
 
-        const request = new Request(`${CLOCKIFY_BASE_URL}/workspaces/${workspaceId}/user/${userId}/time-entries?page-size=1000&start=${start}&end=${end}`)
-        request.headers = {
-            'Content-Type': 'application/json',
-            'X-Api-key': this.apiKey
-        }
+        const request = this.buildRequest(`workspaces/${workspaceId}/user/${userId}/time-entries?page-size=1000&start=${start}&end=${end}`)
 
+        return this.fetchData(request)
+    }
+
+    async fetchData(request) {
         const response = await request.loadJSON()
         if (request.response.statusCode === 401) {
             console.log(request.response)
@@ -65,7 +39,18 @@ class ClockifyAPI {
             console.log(request.response)
             throw "InvalidClockifyResponse"
         }
+
         return response
+    }
+
+    buildRequest(url) {
+        const request = new Request(`${CLOCKIFY_BASE_URL}/${url}`)
+        request.headers = {
+            'Content-Type': 'application/json',
+            'X-Api-key': this.apiKey
+        }
+
+        return request
     }
 }
 
