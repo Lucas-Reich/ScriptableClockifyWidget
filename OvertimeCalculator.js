@@ -9,6 +9,7 @@ class OvertimeCalculator {
         this.workingHoursADay = workingsHoursADay
     }
 
+    // TODO: Work even if timeData is empty (e.g. "2021":{})
     calculateOvertime(timeData) {
         let actualWorkingTimeInMillis = 0
 
@@ -19,7 +20,7 @@ class OvertimeCalculator {
             const {timeInterval} = time
 
             if (null == timeInterval.end) { // Exclude currently running time entry
-                return
+                return // TODO: Set end date to current time if its not finished yet and the user disabled excludeCurrentDayFromStatistics toggle
             }
 
             const start = new Date(timeInterval.start)

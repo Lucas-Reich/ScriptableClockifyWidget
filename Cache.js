@@ -11,13 +11,13 @@ class Cache {
         }
     }
 
-    read = async (key, expirationHours) => { // Add option for cache to never expire
+    read = async (key, expirationHours) => { // TODO: Add option for cache to never expire
         try {
             const path = this.fm.joinPath(this.cachePath, key);
             const createdAt = this.fm.creationDate(path);
 
             if (expirationHours) {
-                if ((new Date()) - createdAt > (expirationHours * 3600000)) {
+                if ((new Date()) - createdAt > (expirationHours * 3_600_000)) {
                     this.fm.remove(path);
                     return null;
                 }

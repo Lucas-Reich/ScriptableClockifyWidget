@@ -6,6 +6,9 @@ const ClockifyAPI = importModule('ClockifyAPI');
 
 const CACHE_NAME = "ClockifyOvertimeWidget";
 const CACHE_EXPIRATION_HOURS = 24;
+const CACHE_SHORT_TERM_DATA_EXPIRATION_HOURS = 24; // Once a day
+const CACHE_MEDIUM_TERM_DATA_EXPIRATION_HOURS = 7 * 24; // Once a week
+const CACHE_LONG_TERM_DATA_EXPIRATION = null; // Once
 
 const CACHE_DATA_USER_ID = 'user_id';
 const CACHE_DATA_USER_WORKSPACE = 'user_workspace'

@@ -39,7 +39,7 @@ class ClockifyOvertimeWidget {
     async buildWidget() {
         let listWidget = new ListWidget()
 
-        const data = await this.calculateAccruedOvertimeSince(this.environment.getExcludeCurrentDayFromStatistics())
+        const data = await this.calculateAccruedOvertimeSince(this.environment.getCalculateWorkingTimeSince())
         if ("error" in data) {
             listWidget.addText(data.error)
         } else {
@@ -51,21 +51,12 @@ class ClockifyOvertimeWidget {
 
     async calculateAccruedOvertimeSince(year) {
         try {
-            let currentYear = new Date().getFullYear()
-
             let overtime = 0
-            // // TODO: Guard against year greater than current year
-            // while (currentYear >= year) { // TODO: Stop fetching data if nothing is returned by the repository
-            //     const timeData = await this.repository.getOvertimeForYear(currentYear)
-            //     overtime += this.overtimeCalculator.calculateOvertime(timeData)
-            //     currentYear -= 1
-            // }
-
-            const timeData1 = await this.repository.getOvertimeForYear(2021)
-            overtime += this.overtimeCalculator.calculateOvertime(timeData1)
-
-            const timeData2 = await this.repository.getOvertimeForYear(2022)
-            overtime += this.overtimeCalculator.calculateOvertime(timeData2)
+            while (year <= new Date().getFullYear()) { // TODO: Stop fetching data if nothing is returned by the repository
+                const timeData = await this.repository.getOvertimeForYear(year)
+                overtime += this.overtimeCalculator.calculateOvertime(timeData)
+                year++
+            }
 
             return {overtime: overtime}
         } catch (e) {

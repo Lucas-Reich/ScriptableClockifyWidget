@@ -21,7 +21,7 @@ const EXCLUDE_CURRENT_DAY_FROM_CALCULATION = true
 const WORKING_HOURS_A_DAY = 6
 
 /**
- * The value must be a number greater than 2000 or 0 if this functionality should be disabled.
+ * The value must be a number greater than 2000 or NULL if this functionality should be disabled.
  *
  * This value is used to exclude time entries that were added before the January 1st of the added year.
  * Set this value to 0 if you don't want to have this feature enabled and include all the values in your account.
@@ -29,6 +29,7 @@ const WORKING_HOURS_A_DAY = 6
 const CALCULATE_OVERTIME_SINCE = 2021
 
 // TODO: Load configuration values from local env file
+// TODO: Check if user set values are actually within allowed bounds
 class Environment {
     getAPIKey() {
         const apiKey = args.widgetParameter
@@ -50,7 +51,7 @@ class Environment {
     }
 
     getCalculateWorkingTimeSince() {
-        return CALCULATE_OVERTIME_SINCE
+        return CALCULATE_OVERTIME_SINCE ?? 2000
     }
 }
 
