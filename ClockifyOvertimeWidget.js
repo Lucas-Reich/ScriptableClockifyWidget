@@ -11,10 +11,6 @@ const Environment = importModule('Environment')
 const ERR_RES_MISSING_API_KEY = "API key angeben!"
 const ERR_RES_DATA_LOADING_ISSUE = "Daten konnten nicht geladen werden!"
 
-// TODO: Always fetch data for current day
-// TODO: Data for the last 7 days is queried once a day
-// TODO: Everything older than one week is queried only once a week
-// TODO: Only query data for past years once
 class ClockifyOvertimeWidget {
     constructor() {
         this.environment = new Environment()
@@ -73,6 +69,47 @@ class ClockifyOvertimeWidget {
             return {error: ERR_RES_DATA_LOADING_ISSUE}
         }
     }
+
+    // // TODO: Always fetch data for current day
+    // // TODO: Data for the last 7 days is queried once a day
+    // // TODO: Everything older than one week is queried only once a week
+    // // TODO: Only query data for past years once
+    // async calculateAccruedOvertimeSinceNewCacheImplementation(year) {
+    //     const today = new Date()
+    //     try {
+    //         const longTermStartDate = `${year}-01-01`
+    //         const longTermEndDate = `${today.getFullYear() - 1}-12-31`
+    //         const longTermData = this.repository.getClockifyTimeInformation(longTermStartDate, longTermEndDate)
+    //
+    //         const mediumTermDate = new Date()
+    //         mediumTermDate.setDate(today.getDate() - 7)
+    //         const mediumTermStartDate = `${mediumTermDate.getFullYear()}-01-01`
+    //         const mediumTermEndDate = mediumTermDate.toDateString()
+    //         const mediumTermData = this.repository.getClockifyTimeInformation(mediumTermStartDate, mediumTermEndDate)
+    //
+    //         const shortTermStartDate =;
+    //         const shortTermEndDate =;
+    //         const shortTermData = this.repository.getClockifyTimeInformation(shortTermStartDate, shortTermEndDate)
+    //
+    //         if (!this.environment.getExcludeCurrentDayFromStatistics()) {
+    //             const todayData = this.repository.getOvertimeForDay(today.toDateString())
+    //         }
+    //
+    //         return {overtime: 0}
+    //     } catch (e) {
+    //         console.log(e)
+    //
+    //         if (e === "InvalidAPIKeyException") {
+    //             return {error: ERR_RES_MISSING_API_KEY}
+    //         }
+    //
+    //         if (e === "InvalidClockifyResponse") {
+    //             return {error: ERR_RES_DATA_LOADING_ISSUE}
+    //         }
+    //
+    //         return {error: ERR_RES_DATA_LOADING_ISSUE}
+    //     }
+    // }
 }
 
 class TimeFormatter {

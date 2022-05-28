@@ -5,7 +5,6 @@ const Cache = importModule('Cache');
 const ClockifyAPI = importModule('ClockifyAPI');
 
 const CACHE_NAME = "ClockifyOvertimeWidget";
-const CACHE_EXPIRATION_HOURS = 24;
 const CACHE_SHORT_TERM_DATA_EXPIRATION_HOURS = 24; // Once a day
 const CACHE_MEDIUM_TERM_DATA_EXPIRATION_HOURS = 7 * 24; // Once a week
 const CACHE_LONG_TERM_DATA_EXPIRATION = null; // Once
@@ -20,15 +19,15 @@ class ClockifyOvertimeRepository {
         this.cache = new Cache(CACHE_NAME)
     }
 
+    async getOvertimeForDay(date) {
+        return await this.getClockifyTimeInformation(date, date)
+    }
+
     async getOvertimeForYear(year) {
-        let cachedWorkingTime = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR, CACHE_EXPIRATION_HOURS)
+        let cachedWorkingTime = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR, CACHE_SHORT_TERM_DATA_EXPIRATION_HOURS)
         if (cachedWorkingTime !== null && cachedWorkingTime[year] !== undefined) return cachedWorkingTime[year]
 
-        const userId = await this.clockifyAPI.getUserId()
-        const workspaceId = await this.clockifyAPI.getWorkspaceId()
-
-        let timeReq = await this.clockifyAPI.getTimeEntriesForYear(userId, workspaceId, year)
-        const timeData = await timeReq
+        const timeData = await this.getClockifyTimeInformation(`${year}-01-01`, `${year}-12-31`)
 
         if (null === cachedWorkingTime) {
             cachedWorkingTime = {}
@@ -39,22 +38,36 @@ class ClockifyOvertimeRepository {
         return timeData
     }
 
+    async getClockifyTimeInformation(dateRangeStart, dateRangeEnd) {
+        const userId = await this.getUserId()
+        const workspaceId = await this.getWorkspaceId()
+
+        return await this.clockifyAPI.getTimeEntriesForDateRange(userId, workspaceId, dateRangeStart, dateRangeEnd)
+    }
+
+    async getClockifyTimeInformationWithCacheTime(dateRangeStart, dateRangeEnd, cacheExpiryTime) {
+        const userId = await this.getUserId()
+        const workspaceId = await this.getWorkspaceId()
+
+        return await this.clockifyAPI.getTimeEntriesForDateRange(userId, workspaceId, dateRangeStart, dateRangeEnd)
+    }
+
     async getWorkspaceId() {
-        const cachedUserWorkspace = await this.cache.read(CACHE_DATA_USER_WORKSPACE, CACHE_EXPIRATION_HOURS);
+        const cachedUserWorkspace = await this.cache.read(CACHE_DATA_USER_WORKSPACE, CACHE_SHORT_TERM_DATA_EXPIRATION_HOURS);
         if (cachedUserWorkspace) return cachedUserWorkspace;
 
-        const workspaceId = this.clockifyAPI.getWorkspaceId()
+        const workspaceId = await this.clockifyAPI.getWorkspaceId()
         this.cache.write(CACHE_DATA_USER_WORKSPACE, workspaceId);
 
         return workspaceId
     }
 
     async getUserId() {
-        const cachedUserId = await this.cache.read(CACHE_DATA_USER_ID, CACHE_EXPIRATION_HOURS);
+        const cachedUserId = await this.cache.read(CACHE_DATA_USER_ID, CACHE_SHORT_TERM_DATA_EXPIRATION_HOURS);
         if (cachedUserId) return cachedUserId;
 
-        const userId = this.clockifyAPI.getUserId()
-        this.cache.write(CACHE_DATA_USER_ID, userId.id);
+        const userId = await this.clockifyAPI.getUserId()
+        this.cache.write(CACHE_DATA_USER_ID, userId);
 
         return userId
     }
