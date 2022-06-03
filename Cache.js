@@ -19,19 +19,23 @@ class Cache {
             if (expirationHours) {
                 if ((new Date()) - createdAt > (expirationHours * 3_600_000)) {
                     this.fm.remove(path);
-                    return null;
+                    return {};
                 }
             }
 
             const value = this.fm.readString(path);
 
             try {
+                if (null == value) {
+                    return {}
+                }
+
                 return JSON.parse(value);
             } catch (error) {
                 return value;
             }
         } catch (error) {
-            return null;
+            return {};
         }
     }
 

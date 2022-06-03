@@ -1,9 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: light-brown; icon-glyph: business-time;
-// Variables used by Scriptable.
-// These must be at the very top of the file. Do not edit.
-// icon-color: orange; icon-glyph: magic;
 const ClockifyOvertimeRepository = importModule('ClockifyOvertimeRepository');
 const OvertimeCalculator = importModule('OvertimeCalculator');
 const Environment = importModule('Environment')

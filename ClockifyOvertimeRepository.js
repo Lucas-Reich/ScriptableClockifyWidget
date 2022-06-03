@@ -29,9 +29,6 @@ class ClockifyOvertimeRepository {
 
         const timeData = await this.getClockifyTimeInformation(`${year}-01-01`, `${year}-12-31`)
 
-        if (null === cachedWorkingTime) {
-            cachedWorkingTime = {}
-        }
         cachedWorkingTime[year] = timeData
         this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cachedWorkingTime)
 
