@@ -49,6 +49,14 @@ class Cache {
             this.fm.writeString(path, JSON.stringify(value));
         }
     }
+
+    readExpiryData = (key) => {
+        // TODO: Load data and check if data timed out, if so delete it and remove nothing
+    }
+
+    writeExpiryData = (key, value, expiryTime) => {
+        // TODO: Store data to cache with time to live to file
+    }
 }
 
 module.exports = Cache;
