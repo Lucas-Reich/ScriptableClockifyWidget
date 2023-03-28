@@ -10,6 +10,7 @@ class OvertimeCalculator {
     }
 
     // TODO: Work even if timeData is empty (e.g. "2021":{})
+    // TODO: Implement functionality to exclude certain entries from the calculation (e.g by setting a tag or something else on the entry)
     calculateOvertime(timeData) {
         let actualWorkingTimeInMillis = 0
 

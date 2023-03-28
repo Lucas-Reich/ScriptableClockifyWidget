@@ -19,7 +19,7 @@ class Cache {
             if (expirationHours) {
                 if ((new Date()) - createdAt > (expirationHours * 3_600_000)) {
                     this.fm.remove(path);
-                    return {};
+                    return null;
                 }
             }
 
@@ -27,7 +27,7 @@ class Cache {
 
             try {
                 if (null == value) {
-                    return {}
+                    return null
                 }
 
                 return JSON.parse(value);
@@ -35,7 +35,7 @@ class Cache {
                 return value;
             }
         } catch (error) {
-            return {};
+            return null;
         }
     }
 
@@ -48,14 +48,6 @@ class Cache {
         } else {
             this.fm.writeString(path, JSON.stringify(value));
         }
-    }
-
-    readExpiryData = (key) => {
-        // TODO: Load data and check if data timed out, if so delete it and remove nothing
-    }
-
-    writeExpiryData = (key, value, expiryTime) => {
-        // TODO: Store data to cache with time to live to file
     }
 }
 

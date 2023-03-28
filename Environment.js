@@ -51,7 +51,7 @@ class Environment {
     }
 
     getCalculateWorkingTimeSince() {
-        return CALCULATE_OVERTIME_SINCE ?? 2000
+        return CALCULATE_OVERTIME_SINCE ?? 2000 // TODO: Can I make this check implicit and stop fetching data if the API doesn't return things anymore? How can I determine if nothing is to come anymore? Could be that the user stopped using the program for a couple of weeks/months.
     }
 }
 
