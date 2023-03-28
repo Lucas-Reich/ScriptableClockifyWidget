@@ -1,6 +1,8 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: brown; icon-glyph: magic;
+const TimeEntryCollection = importModule('TimeEntryCollection');
+
 const CLOCKIFY_BASE_URL = 'https://api.clockify.me/api/v1'
 
 class ClockifyAPI {
@@ -25,8 +27,9 @@ class ClockifyAPI {
         const end = `${dateRangeEnd}T23:59:59Z`
 
         const request = this.buildRequest(`workspaces/${workspaceId}/user/${userId}/time-entries?page-size=1000&start=${start}&end=${end}`)
+        const data = await this.fetchData(request)
 
-        return this.fetchData(request)
+        return new TimeEntryCollection(data)
     }
 
     async fetchData(request) {

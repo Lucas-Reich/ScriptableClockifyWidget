@@ -31,7 +31,8 @@ class ClockifyOvertimeRepository {
         let cachedWorkingTime = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR, 24)
         if (cachedWorkingTime !== null && cachedWorkingTime[year] !== undefined) return cachedWorkingTime[year]
 
-        const timeData = await this.getClockifyTimeInformation(`${year}-01-01`, `${year}-12-31`)
+        const timeEntryCollection = await this.getClockifyTimeInformation(`${year}-01-01`, `${year}-12-31`)
+        const timeData = timeEntryCollection.toJSON()
 
         if (null === cachedWorkingTime) {
             cachedWorkingTime = {}
