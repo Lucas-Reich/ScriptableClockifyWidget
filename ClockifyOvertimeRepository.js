@@ -35,13 +35,13 @@ class ClockifyOvertimeRepository {
         const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
 
         const cacheEntryCollection = CacheEntryCollection.fromCollection(timeEntryCollection)
-        this.cache.write2(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
+        this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
 
         return timeEntryCollection.toJSON() // TODO: Do not transform to JSON but return collection
     }
 
     async getCachedTimeData(year) {
-        let cacheEntryCollection = await this.cache.read2(CACHE_DATA_OVERTIME_BY_YEAR)
+        let cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
 
         if (cacheEntryCollection == null) {
             return null
@@ -62,23 +62,27 @@ class ClockifyOvertimeRepository {
     }
 
     async getWorkspaceId() {
-        const cachedUserWorkspace = await this.cache.read(CACHE_DATA_USER_WORKSPACE, 24);
-        if (null !== cachedUserWorkspace && cachedUserWorkspace.length !== 0) return cachedUserWorkspace;
+        const cachedUserWorkspaceCollection = await this.cache.read(CACHE_DATA_USER_WORKSPACE);
+        if (null !== cachedUserWorkspaceCollection) return JSON.parse(cachedUserWorkspaceCollection.collection.pop().data);
 
-        const workspaceId = await this.clockifyAPI.getWorkspaceId()
-        this.cache.write(CACHE_DATA_USER_WORKSPACE, workspaceId);
+        const rawWorkspaceId = await this.clockifyAPI.getWorkspaceId()
+        const cacheCollection = CacheEntryCollection.fromSingle(rawWorkspaceId)
 
-        return workspaceId
+        this.cache.write(CACHE_DATA_USER_WORKSPACE, cacheCollection);
+
+        return JSON.parse(cacheCollection.collection.pop().data)
     }
 
     async getUserId() {
-        const cachedUserId = await this.cache.read(CACHE_DATA_USER_ID, 24);
-        if (null !== cachedUserId && cachedUserId.length !== 0) return cachedUserId;
+        const cachedUserIdCollection = await this.cache.read(CACHE_DATA_USER_ID)
+        if (null !== cachedUserIdCollection) return JSON.parse(cachedUserIdCollection.collection.pop().data);
 
-        const userId = await this.clockifyAPI.getUserId()
-        this.cache.write(CACHE_DATA_USER_ID, userId);
+        const rawUserId = await this.clockifyAPI.getUserId()
+        const cacheCollection = CacheEntryCollection.fromSingle(rawUserId)
 
-        return userId
+        this.cache.write(CACHE_DATA_USER_ID, cacheCollection);
+
+        return JSON.parse(cacheCollection.collection.pop().data)
     }
 }
 

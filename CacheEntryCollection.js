@@ -35,6 +35,17 @@ class CacheEntryCollection {
         return cacheCollection
     }
 
+    static fromSingle(data) {
+        const cacheCollection = new CacheEntryCollection()
+
+        cacheCollection.add(new CacheEntry(
+            new Date(),
+            JSON.stringify(data)
+        ))
+
+        return cacheCollection
+    }
+
     add(cacheEntry) {
         this.collection.push(cacheEntry)
     }
