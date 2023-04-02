@@ -3,6 +3,7 @@
 // icon-color: cyan; icon-glyph: magic;
 const Cache = importModule('Cache');
 const ClockifyAPI = importModule('ClockifyAPI');
+const CacheEntryCollection = importModule('CacheEntryCollection')
 
 // entries older than 1 month should not be updated
 // entries with age between < 1 month and > 1 week should be refreshed weekly
@@ -11,7 +12,7 @@ const ClockifyAPI = importModule('ClockifyAPI');
 
 // would it make sense to add an expiry date to time entries. -- todo: maybe it also makes sense to put those values into different files (1 file for weekly update, 1 file for daily update, and 1 file for always update)
 // whenever the cache is read all the entries are read again. -- todo: I guess it would make sense to not always read all the entries again as the ones older than 1 month will not change anyway
-// if expiry date <= current date then refetch those items -- todo: can I somehow batch those requests?
+// if expiry date <= current date then re-fetch those items -- todo: can I somehow batch those requests?
 // whenever an item is fetched I check its time value and calculate the expiry time base on the rules above -- todo: I would need to make sure that the old entries are replaced with the new ones
 
 
@@ -28,23 +29,32 @@ class ClockifyOvertimeRepository {
     }
 
     async getOvertimeForYear(year) {
-        let cachedWorkingTime = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR, 24)
-        if (cachedWorkingTime !== null && cachedWorkingTime[year] !== undefined) return cachedWorkingTime[year]
+        let cachedWorkingTime = await this.getCachedTimeData(year)
+        if (cachedWorkingTime !== null) return cachedWorkingTime
 
-        const timeEntryCollection = await this.getClockifyTimeInformation(`${year}-01-01`, `${year}-12-31`)
-        const timeData = timeEntryCollection.toJSON()
+        const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
 
-        if (null === cachedWorkingTime) {
-            cachedWorkingTime = {}
-        }
+        const cacheEntryCollection = CacheEntryCollection.fromCollection(timeEntryCollection)
+        this.cache.write2(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
 
-        cachedWorkingTime[year] = timeData
-        this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cachedWorkingTime)
-
-        return timeData
+        return timeEntryCollection.toJSON() // TODO: Do not transform to JSON but return collection
     }
 
-    async getClockifyTimeInformation(dateRangeStart, dateRangeEnd) {
+    async getCachedTimeData(year) {
+        let cacheEntryCollection = await this.cache.read2(CACHE_DATA_OVERTIME_BY_YEAR)
+
+        if (cacheEntryCollection == null) {
+            return null
+        }
+
+        if (cacheEntryCollection[year] === undefined) {
+            return null
+        }
+
+        return cacheEntryCollection.getEntriesForYear(year)
+    }
+
+    async fetchClockifyAPI(dateRangeStart, dateRangeEnd) {
         const userId = await this.getUserId()
         const workspaceId = await this.getWorkspaceId()
 

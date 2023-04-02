@@ -1,6 +1,8 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: pink; icon-glyph: magic;
+const CacheEntryCollection = importModule('CacheEntryCollection')
+
 class Cache {
     constructor(name) {
         this.fm = FileManager.local();
@@ -11,7 +13,7 @@ class Cache {
         }
     }
 
-    read = async (key, expirationHours) => { // TODO: Add option for cache to never expire
+    read = async (key, expirationHours) => {
         try {
             const path = this.fm.joinPath(this.cachePath, key);
             const createdAt = this.fm.creationDate(path);
@@ -39,6 +41,33 @@ class Cache {
         }
     }
 
+    async read2(key) {
+        try {
+            const path = this.fm.joinPath(this.cachePath, key)
+            const value = this.fm.readString(path)
+
+            try {
+                if (null == value) {
+                    return null
+                }
+
+                const rawData = JSON.parse(value)
+                const rawData2 = []
+
+                // I need to do this in order to extract the data out of the year
+                for (let year in rawData) {
+                    rawData2.push(rawData[year])
+                }
+
+                return CacheEntryCollection.fromCache(rawData2)
+            } catch (error) {
+                return value
+            }
+        } catch (error) {
+            return null
+        }
+    }
+
     write = (key, value) => {
         const path = this.fm.joinPath(this.cachePath, key.replace('/', "-"));
         console.log(`Caching to ${path}...`);
@@ -48,6 +77,13 @@ class Cache {
         } else {
             this.fm.writeString(path, JSON.stringify(value));
         }
+    }
+
+    write2(key, cacheEntryCollection) {
+        const path = this.fm.joinPath(this.cachePath, key.replace('/', "-"))
+        console.log(`Caching to ${path} ...`)
+
+        this.fm.writeString(path, cacheEntryCollection.toJSON())
     }
 }
 
