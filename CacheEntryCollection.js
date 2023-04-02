@@ -13,8 +13,7 @@ class CacheEntryCollection {
 
         json.forEach(cacheEntry => {
             cacheCollection.add(new CacheEntry(
-                // cacheEntry.createdAt, -- todo: Temp disabled
-                new Date(),
+                cacheEntry.createdAt,
                 cacheEntry.data
             ))
         })
