@@ -14,22 +14,17 @@ class Cache {
     }
 
     async read(key) {
-        try {
-            const path = this.fm.joinPath(this.cachePath, key)
-            const value = this.fm.readString(path)
-
-            try {
-                if (null == value) {
-                    return null
-                }
-
-                return CacheEntryCollection.fromCache(JSON.parse(value))
-            } catch (error) {
-                return value
-            }
-        } catch (error) {
+        const path = this.fm.joinPath(this.cachePath, key)
+        if (!this.fm.fileExists(path)) {
             return null
         }
+
+        const value = this.fm.readString(path)
+        if (null == value) {
+            return null
+        }
+
+        return CacheEntryCollection.fromCache(JSON.parse(value))
     }
 
     write(key, cacheEntryCollection) {
