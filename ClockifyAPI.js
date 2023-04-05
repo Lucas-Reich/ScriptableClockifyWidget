@@ -22,6 +22,9 @@ class ClockifyAPI {
         return (await this.fetchData(request)).id
     }
 
+    /**
+     * @returns {Promise<TimeEntryCollection>}
+     */
     async getTimeEntriesForDateRange(userId, workspaceId, dateRangeStart, dateRangeEnd) {
         const start = `${dateRangeStart}T00:00:01Z`
         const end = `${dateRangeEnd}T23:59:59Z`

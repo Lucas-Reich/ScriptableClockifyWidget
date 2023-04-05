@@ -9,7 +9,7 @@ class CacheEntry {
     }
 
     getYear() {
-        const startDate = new Date(this.data['timeInterval']['start'])
+        const startDate = new Date(this.data.timeInterval.start)
 
         return startDate.getFullYear()
     }

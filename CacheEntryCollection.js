@@ -13,7 +13,7 @@ class CacheEntryCollection {
 
         json.forEach(cacheEntry => {
             cacheCollection.add(new CacheEntry(
-                cacheEntry.createdAt,
+                new Date(cacheEntry.createdAt),
                 cacheEntry.data
             ))
         })
@@ -21,19 +21,10 @@ class CacheEntryCollection {
         return cacheCollection
     }
 
-    static fromCollection(collection) {
-        const cacheCollection = new CacheEntryCollection()
-
-        collection.toJSON().forEach(collectionEntry => {
-            cacheCollection.add(new CacheEntry(
-                new Date(),
-                collectionEntry
-            ))
-        })
-
-        return cacheCollection
-    }
-
+    /**
+     * @param data
+     * @returns {CacheEntryCollection}
+     */
     static fromSingle(data) {
         const cacheCollection = new CacheEntryCollection()
 
@@ -45,10 +36,30 @@ class CacheEntryCollection {
         return cacheCollection
     }
 
+    /**
+     * @param {CacheEntry} cacheEntry
+     * @returns void
+     */
     add(cacheEntry) {
         this.collection.push(cacheEntry)
     }
 
+    /**
+     * @param {TimeEntryCollection} timeEntries
+     */
+    addTimeEntries(timeEntries) {
+        timeEntries.toJSON().forEach(timeEntry => {
+            this.add(new CacheEntry(
+                new Date(),
+                timeEntry
+            ))
+        })
+    }
+
+    /**
+     * @param {int} year
+     * @returns {CacheEntry[]}
+     */
     getEntriesForYear(year) { // TODO: Should probably not do this in here
         const output = []
 

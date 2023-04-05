@@ -29,31 +29,22 @@ class ClockifyOvertimeRepository {
     }
 
     async getOvertimeForYear(year) {
-        let cachedWorkingTime = await this.getCachedTimeData(year)
-        if (cachedWorkingTime !== null) return cachedWorkingTime
+        const cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
+        const entries = cacheEntryCollection.getEntriesForYear(year)
+        if (entries.length !== 0) return entries
 
         const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
+        cacheEntryCollection.addTimeEntries(timeEntryCollection)
 
-        const cacheEntryCollection = CacheEntryCollection.fromCollection(timeEntryCollection)
         this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
 
+        // TODO: Add newly fetched entries to existing cache values
         return timeEntryCollection.toJSON() // TODO: Do not transform to JSON but return collection
     }
 
-    async getCachedTimeData(year) {
-        let cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
-
-        if (cacheEntryCollection == null) {
-            return null
-        }
-
-        if (cacheEntryCollection[year] === undefined) {
-            return null
-        }
-
-        return cacheEntryCollection.getEntriesForYear(year)
-    }
-
+    /**
+     * @returns {Promise<TimeEntryCollection>}
+     */
     async fetchClockifyAPI(dateRangeStart, dateRangeEnd) {
         const userId = await this.getUserId()
         const workspaceId = await this.getWorkspaceId()

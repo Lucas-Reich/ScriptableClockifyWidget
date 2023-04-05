@@ -18,7 +18,7 @@ class OvertimeCalculator {
 
         let lastEndDat = undefined
         timeData.forEach(time => {
-            const {timeInterval} = time
+            const {timeInterval} = time.data
 
             if (null == timeInterval.end) { // Exclude currently running time entry
                 return // TODO: Set end date to current time if its not finished yet and the user disabled excludeCurrentDayFromStatistics toggle

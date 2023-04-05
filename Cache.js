@@ -13,15 +13,19 @@ class Cache {
         }
     }
 
+    /**
+     * @param {string} key
+     * @returns {Promise<CacheEntryCollection>}
+     */
     async read(key) {
         const path = this.fm.joinPath(this.cachePath, key)
         if (!this.fm.fileExists(path)) {
-            return null
+            return new CacheEntryCollection()
         }
 
         const value = this.fm.readString(path)
         if (null == value) {
-            return null
+            return new CacheEntryCollection()
         }
 
         return CacheEntryCollection.fromCache(JSON.parse(value))
