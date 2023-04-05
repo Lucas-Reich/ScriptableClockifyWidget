@@ -38,7 +38,6 @@ class ClockifyOvertimeRepository {
 
         this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
 
-        // TODO: Add newly fetched entries to existing cache values
         return timeEntryCollection.toJSON() // TODO: Do not transform to JSON but return collection
     }
 
