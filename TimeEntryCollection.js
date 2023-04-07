@@ -18,6 +18,28 @@ class TimeEntryCollection {
         })
     }
 
+    /**
+     * @param {CacheEntry[]} cacheCollection
+     */
+    static fromCacheCollection(cacheCollection) {
+        const self = new TimeEntryCollection([])
+
+        /**
+         * @param {CacheEntry} cacheEntry
+         */
+        cacheCollection.forEach(cacheEntry => {
+            const data = cacheEntry.data.timeInterval
+
+            self.add(new TimeEntry(
+                new Date(data.start),
+                new Date(data.end),
+                data.duration
+            ))
+        })
+
+        return self
+    }
+
     add(timeEntry) {
         this.collection.push(timeEntry)
     }

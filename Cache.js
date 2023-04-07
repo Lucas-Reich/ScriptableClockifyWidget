@@ -28,7 +28,22 @@ class Cache {
             return new CacheEntryCollection()
         }
 
+        // TODO: Remove temporary fix for fetching new items
+        if (this.shouldCacheExpire(path)) {
+            return new CacheEntryCollection()
+        }
+
         return CacheEntryCollection.fromCache(JSON.parse(value))
+    }
+
+    /**
+     * @param {string} path
+     * @returns {boolean}
+     */
+    shouldCacheExpire(path) {
+        const createdAt = this.fm.creationDate(path);
+
+        return (new Date()) - createdAt > (24 * 3_600_000);
     }
 
     write(key, cacheEntryCollection) {

@@ -4,6 +4,7 @@
 const Cache = importModule('Cache');
 const ClockifyAPI = importModule('ClockifyAPI');
 const CacheEntryCollection = importModule('CacheEntryCollection')
+const TimeEntryCollection = importModule('TimeEntryCollection')
 
 // entries older than 1 month should not be updated
 // entries with age between < 1 month and > 1 week should be refreshed weekly
@@ -31,7 +32,7 @@ class ClockifyOvertimeRepository {
     async getOvertimeForYear(year) {
         const cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
         const entries = cacheEntryCollection.getEntriesForYear(year)
-        if (entries.length !== 0) return entries
+        if (entries.length !== 0) return TimeEntryCollection.fromCacheCollection(entries).toJSON()
 
         const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
         cacheEntryCollection.addTimeEntries(timeEntryCollection)
@@ -51,9 +52,12 @@ class ClockifyOvertimeRepository {
         return await this.clockifyAPI.getTimeEntriesForDateRange(userId, workspaceId, dateRangeStart, dateRangeEnd)
     }
 
+    /**
+     * @returns {Promise<string>}
+     */
     async getWorkspaceId() {
         const cachedUserWorkspaceCollection = await this.cache.read(CACHE_DATA_USER_WORKSPACE);
-        if (null !== cachedUserWorkspaceCollection) return JSON.parse(cachedUserWorkspaceCollection.collection.pop().data);
+        if (0 !== cachedUserWorkspaceCollection.collection.length) return JSON.parse(cachedUserWorkspaceCollection.collection.pop().data);
 
         const rawWorkspaceId = await this.clockifyAPI.getWorkspaceId()
         const cacheCollection = CacheEntryCollection.fromSingle(rawWorkspaceId)
@@ -63,9 +67,12 @@ class ClockifyOvertimeRepository {
         return JSON.parse(cacheCollection.collection.pop().data)
     }
 
+    /**
+     * @returns {Promise<string>}
+     */
     async getUserId() {
         const cachedUserIdCollection = await this.cache.read(CACHE_DATA_USER_ID)
-        if (null !== cachedUserIdCollection) return JSON.parse(cachedUserIdCollection.collection.pop().data);
+        if (0 !== cachedUserIdCollection.collection.length) return JSON.parse(cachedUserIdCollection.collection.pop().data);
 
         const rawUserId = await this.clockifyAPI.getUserId()
         const cacheCollection = CacheEntryCollection.fromSingle(rawUserId)
