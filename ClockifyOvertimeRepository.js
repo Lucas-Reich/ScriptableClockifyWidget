@@ -29,17 +29,21 @@ class ClockifyOvertimeRepository {
         this.cache = new Cache(CACHE_NAME)
     }
 
+    /**
+     * @param {int} year
+     * @returns {Promise<TimeEntryCollection>}
+     */
     async getOvertimeForYear(year) {
         const cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
         const entries = cacheEntryCollection.getEntriesForYear(year)
-        if (entries.length !== 0) return TimeEntryCollection.fromCacheCollection(entries).toJSON()
+        if (entries.length !== 0) return TimeEntryCollection.fromCacheCollection(entries)
 
         const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
         cacheEntryCollection.addTimeEntries(timeEntryCollection)
 
         this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
 
-        return timeEntryCollection.toJSON() // TODO: Do not transform to JSON but return collection
+        return timeEntryCollection
     }
 
     /**

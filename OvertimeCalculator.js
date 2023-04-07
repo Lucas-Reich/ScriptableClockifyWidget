@@ -11,33 +11,32 @@ class OvertimeCalculator {
 
     // TODO: Work even if timeData is empty (e.g. "2021":{})
     // TODO: Implement functionality to exclude certain entries from the calculation (e.g by setting a tag or something else on the entry)
+    /**
+     * @param {TimeEntryCollection} timeData
+     * @returns {number}
+     */
     calculateOvertime(timeData) {
         let actualWorkingTimeInMillis = 0
 
         let days = 0
 
         let lastEndDat = undefined
-        timeData.forEach(time => {
-            const {timeInterval} = time
-
-            if (null == timeInterval.end) { // Exclude currently running time entry
+        timeData.collection.forEach(time => {
+            if (null == time.end) { // Exclude currently running time entry
                 return // TODO: Set end date to current time if its not finished yet and the user disabled excludeCurrentDayFromStatistics toggle
             }
 
-            const start = new Date(timeInterval.start)
-            const end = new Date(timeInterval.end)
-
-            if (this.excludeCurrentDayFromStatistics && this.isToday(start)) {
+            if (this.excludeCurrentDayFromStatistics && this.isToday(time.start)) {
                 return
             }
 
-            if (this.areDifferentDays(lastEndDat, start)) {
+            if (this.areDifferentDays(lastEndDat, time.start)) {
                 days++
             }
 
-            actualWorkingTimeInMillis += end - start
+            actualWorkingTimeInMillis += time.end - time.start
 
-            lastEndDat = end
+            lastEndDat = time.end
         })
 
         const expectedWorkingTimeInMillis = days * this.workingHoursADay * ONE_HOUR_IN_MILLIS
