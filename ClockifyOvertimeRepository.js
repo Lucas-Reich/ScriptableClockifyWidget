@@ -47,6 +47,64 @@ class ClockifyOvertimeRepository {
     }
 
     /**
+     * @param {CacheEntryCollection} cacheEntryCollection
+     *
+     * @return {CacheEntryCollection}
+     */
+    refreshOutdatedItems(cacheEntryCollection) { // TODO: Use to update outdated items
+        const outdatedItems = this.findOutdatedEntries(cacheEntryCollection)
+
+        // todo: refresh outdated items
+        //  group dates of outdated items as best as possible and send request to ClockifyAPI
+
+        // todo: update items in list
+
+        return cacheEntryCollection
+    }
+
+    /**
+     * @param {CacheEntryCollection} cacheCollection
+     */
+    findOutdatedEntries(cacheCollection) {
+        /**
+         * @type {CacheEntry[]}
+         */
+        const outdatedEntries = []
+
+        cacheCollection.collection.forEach(cacheEntry => {
+            if (this.isOutdated(cacheEntry)) {
+                outdatedEntries.push(cacheEntry)
+            }
+        })
+
+        return outdatedEntries
+    }
+
+    /**
+     * @param {CacheEntry} cacheEntry
+     *
+     * @return {boolean}
+     */
+    isOutdated(cacheEntry) {
+        const createdXDaysAgo = Math.ceil((new Date() - cacheEntry.data.timeInterval.start) / (1000 * 3600 * 24))
+        const ageInDays = Math.ceil((new Date() - cacheEntry.createdAt) / (1000 * 3600 * 24))
+
+        if (createdXDaysAgo > 30) {
+            return false
+        }
+
+        if (createdXDaysAgo > 7 && createdXDaysAgo <= 30) {
+            return ageInDays >= 7
+        }
+
+        if (createdXDaysAgo > 1 && createdXDaysAgo <= 7) {
+            return ageInDays >= 1
+        }
+
+        return true
+    }
+
+    /**
      * @returns {Promise<TimeEntryCollection>}
      */
     async fetchClockifyAPI(dateRangeStart, dateRangeEnd) {
