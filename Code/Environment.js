@@ -24,16 +24,15 @@ const WORKING_HOURS_A_DAY = 6
  * The value must be a number greater than 2000 or NULL if this functionality should be disabled.
  *
  * This value is used to exclude time entries that were added before the January 1st of the added year.
- * Set this value to 0 if you don't want to have this feature enabled and include all the values in your account.
+ * Set this value to NULL if you don't want to have this feature enabled and include all the values in your account.
  */
 const CALCULATE_OVERTIME_SINCE = 2021
 
 // TODO: Load configuration values from local env file
-// TODO: Check if user set values are actually within allowed bounds
 class Environment {
     getAPIKey() {
         const apiKey = args.widgetParameter
-        if (apiKey !== null && apiKey.length > 0) {
+        if (apiKey !== null && apiKey instanceof String && apiKey.length > 0) {
             return apiKey
         }
 
@@ -43,15 +42,31 @@ class Environment {
     }
 
     getDailyWorkingHours() {
+        if (WORKING_HOURS_A_DAY < 1 || WORKING_HOURS_A_DAY > 23) {
+            throw "Invalid daily working hours value. Please set a value between 1 and 23."
+        }
+
         return WORKING_HOURS_A_DAY
     }
 
     getExcludeCurrentDayFromStatistics() {
+        if (EXCLUDE_CURRENT_DAY_FROM_CALCULATION !== true && EXCLUDE_CURRENT_DAY_FROM_CALCULATION !== false) {
+            throw "Invalid value for EXCLUDE_CURRENT_DAY_FROM_CALCULATION. Please set it to either 'true' or 'false'."
+        }
+
         return EXCLUDE_CURRENT_DAY_FROM_CALCULATION
     }
 
     getCalculateWorkingTimeSince() {
-        return CALCULATE_OVERTIME_SINCE ?? 2000 // TODO: Can I make this check implicit and stop fetching data if the API doesn't return things anymore? How can I determine if nothing is to come anymore? Could be that the user stopped using the program for a couple of weeks/months.
+        if (CALCULATE_OVERTIME_SINCE instanceof Number && CALCULATE_OVERTIME_SINCE < 2000) {
+            throw "Invalid value for CALCULATE_OVERTIME_SINCE. Please set it to a value greater than 2000 or NULL."
+        }
+
+        if (CALCULATE_OVERTIME_SINCE === null) {
+            return 2000
+        }
+
+        return CALCULATE_OVERTIME_SINCE// TODO: Can I make this check implicit and stop fetching data if the API doesn't return things anymore? How can I determine if nothing is to come anymore? Could be that the user stopped using the program for a couple of weeks/months.
     }
 }
 

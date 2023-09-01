@@ -1,9 +1,9 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: light-brown; icon-glyph: business-time;
-const ClockifyOvertimeRepository = importModule('ClockifyOvertimeRepository');
-const OvertimeCalculator = importModule('OvertimeCalculator');
-const Environment = importModule('Environment')
+const ClockifyOvertimeRepository = importModule('/Code/ClockifyOvertimeRepository');
+const OvertimeCalculator = importModule('/Code/OvertimeCalculator');
+const Environment = importModule('/Code/Environment')
 
 const ERR_RES_MISSING_API_KEY = "API key angeben!"
 const ERR_RES_DATA_LOADING_ISSUE = "Daten konnten nicht geladen werden!"
