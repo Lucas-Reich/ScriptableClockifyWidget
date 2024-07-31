@@ -47,6 +47,25 @@ class ClockifyOvertimeRepository {
     }
 
     /**
+     * @param {int} year
+     * @returns {Promise<TimeEntryCollection>}
+     */
+    async getOvertimeForYearRefreshingOutdatedItems(year) {
+        let cacheEntryCollection = await this.cache.read(CACHE_DATA_OVERTIME_BY_YEAR)
+        cacheEntryCollection = this.refreshOutdatedItems(cacheEntryCollection);
+
+        const entries = cacheEntryCollection.getEntriesForYear(year)
+        if (entries.length !== 0) return TimeEntryCollection.fromCacheCollection(entries)
+
+        const timeEntryCollection = await this.fetchClockifyAPI(`${year}-01-01`, `${year}-12-31`)
+        cacheEntryCollection.addTimeEntries(timeEntryCollection)
+
+        this.cache.write(CACHE_DATA_OVERTIME_BY_YEAR, cacheEntryCollection)
+
+        return timeEntryCollection
+    }
+
+    /**
      * @param {CacheEntryCollection} cacheEntryCollection
      *
      * @return {CacheEntryCollection}
@@ -54,12 +73,46 @@ class ClockifyOvertimeRepository {
     refreshOutdatedItems(cacheEntryCollection) { // TODO: Use to update outdated items
         const outdatedItems = this.findOutdatedEntries(cacheEntryCollection)
 
-        // todo: refresh outdated items
-        //  group dates of outdated items as best as possible and send request to ClockifyAPI
+        // group items with consecutive dates
+        const groupedItems = []
+        let lastOutdatedItem = null
+        outdatedItems.forEach(cacheEntry => {
+            if (null === lastOutdatedItem) {
+                lastOutdatedItem = cacheEntry
+                groupedItems.push([cacheEntry])
+                return
+            }
 
-        // todo: update items in list
+            // check if lastOutdatedItem.date + 1 = cacheEntry.date.
+            if (this.checkIfDate2FollowsDate1(lastOutdatedItem.createdAt, cacheEntry.createdAt)) {
+                // If so add cacheEntry to last array inn groupedItems
+                groupedItems[groupedItems.length - 1].push(cacheEntry)
+                lastOutdatedItem = cacheEntry
+            } else {
+                groupedItems.push([cacheEntry])
+                lastOutdatedItem = cacheEntry
+            }
+        })
+
+        // foreach group send a request to clockify API
+        let updatedItems = []
+        groupedItems.forEach(itemGroup => {
+            const firstDate = itemGroup[0];
+            const lastDate = itemGroup[itemGroup.length - 1];
+
+            updatedItems = await this.fetchClockifyAPI(firstDate, lastDate)
+        })
+
+        cacheEntryCollection.upsert(updatedItems)
 
         return cacheEntryCollection
+    }
+
+    checkIfDate2FollowsDate1(date1, date2) {
+        const date1Following = new Date(date1)
+        date1Following.setDate(date1.getDate() + 1)
+
+        return date1Following.getTime() === date2.getTime()
     }
 
     /**

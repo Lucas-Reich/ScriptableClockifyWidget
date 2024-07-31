@@ -56,6 +56,17 @@ class CacheEntryCollection {
         })
     }
 
+    upsert(other) {
+        const copy = this.collection
+
+        other.forEach(otherTimeEntry => {
+            const insertIndex = 0; // TODO: Get insertIndex
+            copy[insertIndex] = otherTimeEntry
+        })
+
+        return copy;
+    }
+
     /**
      * @param {int} year
      * @returns {CacheEntry[]}
